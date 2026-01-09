@@ -11,7 +11,7 @@ if "FMP_API_KEY" not in st.secrets:
     st.error("Missing FMP_API_KEY in Streamlit Secrets!")
     st.stop()
 
-FMP_KEY = st.secrets["FMP_API_KEY"]
+FMP_KEY = st.secrets["9Scnmo1coPSy2BxvqJUt4j6V15avI81x"]
 BASE_URL = "https://financialmodelingprep.com/api/v3/"
 
 def get_fmp(endpoint, ticker):
@@ -74,3 +74,4 @@ with tab2:
             if cat: results[cat].append(t)
         
         st.write(results)
+
