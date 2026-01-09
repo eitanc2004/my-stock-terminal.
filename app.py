@@ -5,12 +5,13 @@ import requests
 st.set_page_config(page_title="Eitan Forensic Terminal", layout="wide")
 st.title("🏛️ הטרמינל של איתן - ניתוח ערך ופורנזיקה")
 
-# בדיקה שהמפתח קיים בכספת
+# בדיקה שהמפתח קיים בכספת של Streamlit
 if "FMP_API_KEY" not in st.secrets:
-    st.error("❌ חסר מפתח בכספת! עקוב אחר שלב 2 במדריך.")
+    st.error("❌ חסר מפתח בכספת! בצע את שלב 2 במדריך.")
     st.stop()
 
-FMP_KEY = st.secrets["9Scnmo1coPSy2BxvqJUt4j6V15avI81x"]
+# התיקון הקריטי: אנחנו קוראים למגירה בשם FMP_API_KEY
+FMP_KEY = st.secrets["FMP_API_KEY"]
 BASE_URL = "https://financialmodelingprep.com/api/v3/"
 
 def get_data(endpoint, ticker):
@@ -28,7 +29,7 @@ def classify_stock(ticker):
     roic = m.get('roicTTM', 0) * 100
     z_score = m.get('altmanZScoreTTM', 0)
     
-    # סינון לפי 'הפתק' של איתן
+    # סינון פורנזי לפי האסטרטגיה שלך
     if z_score < 1.8 or roic < 10:
         return "🔴 לא רלוונטי"
     elif pe <= 15 and roic >= 15 and z_score >= 3:
@@ -46,11 +47,12 @@ with tab1:
         st.subheader(f"סטטוס: {res}")
         data = get_data("key-metrics-ttm", ticker)
         if data:
-            st.write(f"מכפיל רווח: {round(data[0]['peRatioTTM'], 1)}")
-            st.write(f"ROIC: {round(data[0]['roicTTM']*100, 1)}%")
+            st.write(f"מכפיל רווח (P/E): {round(data[0]['peRatioTTM'], 1)}")
+            st.write(f"תשואה על ההון (ROIC): {round(data[0]['roicTTM']*100, 1)}%")
+            st.write(f"חוסן פיננסי (Altman-Z): {round(data[0]['altmanZScoreTTM'], 2)}")
 
 with tab2:
-    st.subheader("סינון רוחבי")
+    st.subheader("סינון מניות לשלושת ה'דליים'")
     list_in = st.text_area("רשימת מניות (פסיקים):", "CROX, PYPL, NVDA, SFM, DECK")
     if st.button("הפעל סריקה"):
         tickers = [t.strip().upper() for t in list_in.split(",")]
@@ -58,9 +60,15 @@ with tab2:
         for t in tickers:
             cat = classify_stock(t)
             if cat in results: results[cat].append(t)
-        st.columns(3)[0].success("🟢 פוטנציאליות")
-        for s in results["🟢 פוטנציאלית (BUY)"]: st.write(s)
-        st.columns(3)[1].warning("🟡 למעקב")
-        for s in results["🟡 למעקב (Watchlist)"]: st.write(s)
-        st.columns(3)[2].error("🔴 לא רלוונטי")
-        for s in results["🔴 לא רלוונטי"]: st.write(s)
+        
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.success("🟢 פוטנציאליות")
+            for s in results["🟢 פוטנציאלית (BUY)"]: st.write(s)
+        with c2:
+            st.warning("🟡 למעקב")
+            for s in results["🟡 למעקב (Watchlist)"]: st.write(s)
+        with c3:
+            st.error("🔴 לא רלוונטי")
+            for s in results["🔴 לא רלוונטי"]: st.write(s)
+
